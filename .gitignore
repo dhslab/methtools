@@ -1,0 +1,36 @@
+# OS and editor files
+.DS_Store
+.vscode/
+.devcontainer/
+.editorconfig
+.prettierignore
+.prettierrc.yml
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+
+# Jupyter artifacts
+**/.ipynb_checkpoints/
+
+# Temporary files
+**/~*
+**/._*
+
+# Bash/session artifacts
+**/.dir_bash_history
+
+# Test output or temporary test scripts
+**/test_output*
+# (keep this broad if needed, or fine-tune)
+
+# Archive directories
+archive/
+archive*/              # e.g., archive_v1/
+**/archive*/           # nested versions
+
+# Pylance / Pyright config
+pyrightconfig.json
