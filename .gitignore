@@ -11,7 +11,7 @@ __pycache__/
 **/__pycache__/
 *.py[cod]
 *$py.class
-
+*.pyc
 
 # Jupyter artifacts
 **/.ipynb_checkpoints/
@@ -31,6 +31,11 @@ __pycache__/
 archive/
 archive*/              # e.g., archive_v1/
 **/archive*/           # nested versions
+
+# Ignore unnecessary files and folders for building the app
+methtools.egg-info/
+build/
+dist/
 
 # Pylance / Pyright config
 pyrightconfig.json
