@@ -4,32 +4,12 @@ from pybedtools import BedTool
 import pysam
 import logging
 import sys
+from methtools.utils.logging import setup_logging
 
 pysam.set_verbosity(0)
 import warnings
 
 warnings.simplefilter("ignore", UserWarning)
-
-
-def setup_logging():
-    """
-    Configures the logging to write INFO and above messages to stderr.
-    """
-    # Create a logger
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)  # Set the minimum logging level
-
-    # Define a logging format
-    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-
-    # Create a StreamHandler for stderr
-    stderr_handler = logging.StreamHandler(sys.stderr)
-    stderr_handler.setLevel(logging.INFO)  # Set handler level
-    stderr_handler.setFormatter(formatter)  # Set formatter
-
-    # Add the handler to the logger
-    logger.addHandler(stderr_handler)
-
 
 # Initialize logging configuration
 setup_logging()

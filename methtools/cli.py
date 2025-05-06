@@ -1,5 +1,6 @@
 import typer
 from .snpsplit.snp_split import main as snpsplit_main
+from .readmeth.read_meth import main as readmeth_main
 from types import SimpleNamespace
 
 app = typer.Typer()
@@ -44,6 +45,31 @@ def snpsplit(
         out_prefix=out_prefix,
     )
     snpsplit_main(args)
+
+
+@app.command()
+def readmeth(
+    bam: str = typer.Option(..., help="Comma-separated list of one or two BAM files."),
+    haplotypes: str = typer.Option(
+        "ref,alt", help="Comma-separated haplotype names for the two BAM files."
+    ),
+    out_file: str = typer.Option(..., help="Output file path."),
+    regions_bed: str = typer.Option(..., help="Regions BED file."),
+    sample: str = typer.Option(..., help="Sample name."),
+):
+    """Extract read level methylation data from BAM files."""
+    typer.echo("Running methylation data processing...")
+    bam_list = bam.split(",")  # Split the comma-separated BAM file paths into a list
+    haplotype_list = haplotypes.split(
+        ","
+    )  # Split the comma-separated haplotype names into a list
+    readmeth_main(
+        bam=bam_list,
+        haplotypes=haplotype_list,
+        out_file=out_file,
+        regions_bed=regions_bed,
+        sample=sample,
+    )
 
 
 if __name__ == "__main__":
