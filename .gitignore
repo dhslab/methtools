@@ -25,6 +25,7 @@ __pycache__/
 
 # Test output or temporary test scripts
 **/test_output*
+**/test*
 # (keep this broad if needed, or fine-tune)
 
 # Archive directories

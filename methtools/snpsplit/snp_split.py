@@ -2,9 +2,8 @@ import os
 import pandas as pd
 from pybedtools import BedTool
 import pysam
-import logging
 import sys
-from methtools.utils.logging import setup_logging
+from methtools.utils.logconfig import setup_logging
 
 pysam.set_verbosity(0)
 import warnings
