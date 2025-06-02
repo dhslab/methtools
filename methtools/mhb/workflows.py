@@ -235,12 +235,16 @@ def mhb_workflow_from_bams(
         # Define minimum versions (these are examples, adjust as necessary)
         samtools_min_version = "1.9"
         modkit_min_version = "0.1.10" # Version that includes 'extract calls'
+        bedtools_min_version = "2.31.1"  # Version required for accurate BED file operations
 
         logger.info(f"Checking for samtools (minimum version {samtools_min_version})...")
         check_tool_version("samtools", samtools_min_version)
 
         logger.info(f"Checking for modkit (minimum version {modkit_min_version})...")
         check_tool_version("modkit", modkit_min_version)
+
+        logger.info(f"Checking for bedtools (minimum version {bedtools_min_version})...")
+        check_tool_version("bedtools", bedtools_min_version)
         logger.info("Prerequisite tools check passed.")
 
     except RuntimeError as e:

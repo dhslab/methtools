@@ -29,6 +29,16 @@ Methtools is a Python toolkit for methylation analysis, providing command-line t
 
 After installation, the `methtools` command should be available in your terminal.
 
+## Prerequisite Tools
+
+Methtools requires the following command-line tools to be installed and available in your PATH:
+
+- **Samtools** (minimum version 1.9)
+- **Modkit** (minimum version 0.1.10)
+- **Bedtools** (minimum version 2.31.1)
+
+Ensure these tools are installed and meet the minimum version requirements before running workflows.
+
 ## Command-Line Interface (CLI)
 
 Methtools offers the following command-line tools:
