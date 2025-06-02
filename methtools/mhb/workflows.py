@@ -64,14 +64,14 @@ def _validate_and_prepare_output_formats(output_formats_req: Optional[List[str]]
 
 def _check_common_tool_versions() -> bool:
     """Checks versions for common tools required by multiple workflows."""
-    logger.info("Checking for common prerequisite command-line tools...")
+    # logger.info("Checking for common prerequisite command-line tools...")
     try:
         # Define minimum versions
         bedtools_min_version = "2.31.1"  # Version required for accurate BED file operations
 
-        logger.info(f"Checking for bedtools (minimum version {bedtools_min_version})...")
+        # logger.info(f"Checking for bedtools (minimum version {bedtools_min_version})...")
         check_tool_version("bedtools", bedtools_min_version)
-        logger.info("Common prerequisite tools check passed.")
+        # logger.info("Common prerequisite tools check passed.")
         return True
 
     except RuntimeError as e:
@@ -258,12 +258,12 @@ def mhb_workflow_from_bams(
         samtools_min_version = "1.9"
         modkit_min_version = "0.1.10" # Version that includes 'extract calls'
 
-        logger.info(f"Checking for samtools (minimum version {samtools_min_version})...")
+        # logger.info(f"Checking for samtools (minimum version {samtools_min_version})...")
         check_tool_version("samtools", samtools_min_version)
 
-        logger.info(f"Checking for modkit (minimum version {modkit_min_version})...")
+        # logger.info(f"Checking for modkit (minimum version {modkit_min_version})...")
         check_tool_version("modkit", modkit_min_version)
-        logger.info("BAM-specific prerequisite tools check passed.")
+        # logger.info("BAM-specific prerequisite tools check passed.")
 
     except RuntimeError as e:
         # check_tool_version logs details of the failure.
