@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import pysam
 import logging
-from methtools.utils.logging import setup_logging
+from methtools.utils.logconfig import setup_logging
 
 
 def main(bam: list, haplotypes: list, out_file: str, regions_bed: str, sample: str):
