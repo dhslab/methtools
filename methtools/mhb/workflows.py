@@ -62,6 +62,24 @@ def _validate_and_prepare_output_formats(output_formats_req: Optional[List[str]]
     return valid_formats
 
 
+def _check_common_tool_versions() -> bool:
+    """Checks versions for common tools required by multiple workflows."""
+    logger.info("Checking for common prerequisite command-line tools...")
+    try:
+        # Define minimum versions
+        bedtools_min_version = "2.31.1"  # Version required for accurate BED file operations
+
+        logger.info(f"Checking for bedtools (minimum version {bedtools_min_version})...")
+        check_tool_version("bedtools", bedtools_min_version)
+        logger.info("Common prerequisite tools check passed.")
+        return True
+
+    except RuntimeError as e:
+        # check_tool_version logs details of the failure.
+        logger.error(f"Common tool version check failed: {e}. Workflow cannot proceed.")
+        return False
+
+
 def _mhb_core_processing_and_saving(
     actual_methylation_calls_files: List[Path],
     regions_bed_file_path: Path,
@@ -211,6 +229,10 @@ def mhb_workflow_from_bams(
     logger.info(f"Output directory set to: '{output_dir_path.resolve()}'")
     logger.info(f"Number of threads for parallel tasks: {num_threads}")
 
+    # --- Common Prerequisite Tool Checks ---
+    if not _check_common_tool_versions():
+        return False
+
     output_formats_validated = _validate_and_prepare_output_formats(output_formats)
     if not output_formats_validated:
         return False
@@ -229,23 +251,19 @@ def mhb_workflow_from_bams(
     if not _validate_common_inputs(regions_bed_file_path, cpg_annotations_bed_path, output_dir_path):
         return False
 
-    # --- Prerequisite Tool Checks ---
-    logger.info("Checking for prerequisite command-line tools...")
+    # --- BAM-specific Prerequisite Tool Checks ---
+    logger.info("Checking for BAM-specific prerequisite command-line tools...")
     try:
         # Define minimum versions (these are examples, adjust as necessary)
         samtools_min_version = "1.9"
         modkit_min_version = "0.1.10" # Version that includes 'extract calls'
-        bedtools_min_version = "2.31.1"  # Version required for accurate BED file operations
 
         logger.info(f"Checking for samtools (minimum version {samtools_min_version})...")
         check_tool_version("samtools", samtools_min_version)
 
         logger.info(f"Checking for modkit (minimum version {modkit_min_version})...")
         check_tool_version("modkit", modkit_min_version)
-
-        logger.info(f"Checking for bedtools (minimum version {bedtools_min_version})...")
-        check_tool_version("bedtools", bedtools_min_version)
-        logger.info("Prerequisite tools check passed.")
+        logger.info("BAM-specific prerequisite tools check passed.")
 
     except RuntimeError as e:
         # check_tool_version logs details of the failure.
@@ -394,6 +412,10 @@ def mhb_workflow_from_precomputed_calls(
     logger.info("Starting MHB Workflow (from precomputed calls)...")
     logger.info(f"Output directory set to: '{output_dir_path.resolve()}'")
     logger.info(f"Number of threads for parallel tasks: {num_threads}")
+
+    # --- Common Prerequisite Tool Checks ---
+    if not _check_common_tool_versions():
+        return False
 
     output_formats_validated = _validate_and_prepare_output_formats(output_formats)
     if not output_formats_validated:
