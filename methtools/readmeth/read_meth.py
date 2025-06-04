@@ -33,7 +33,7 @@ def main(bam: list, haplotypes: list, out_file: str, regions_bed: str, sample: s
     # Log the number of regions being processed
     logger.info(f"Number of regions to process: {len(regions_df)}")
 
-    all_reads_df_list = []
+    # all_reads_df_list = []
 
     columns = [
         "chrom",
