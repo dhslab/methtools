@@ -3,36 +3,35 @@ import pandas as pd
 import numpy as np
 import pysam
 import logging
-from methtools.utils.logconfig import setup_logging
 
 
 def main(bam: list, haplotypes: list, out_file: str, regions_bed: str, sample: str):
     # Initialize logging configuration
-    setup_logging()
+    logger = logging.getLogger(__name__)
 
     if len(bam) == 1:
-        logging.info(
+        logger.info(
             "Single BAM file provided. No haplotype consideration will be taken."
         )
         bams_dict = {sample: {"single": bam[0]}}
         haplotypes = ["single"]
     else:
-        logging.info(
+        logger.info(
             "Two BAM files provided. Assuming ref and alt haplotypes unless overridden."
         )
         bams_dict = {sample: {haplotypes[0]: bam[0], haplotypes[1]: bam[1]}}
 
     # Add logging statements to provide information about the script's progress
-    logging.info("Starting methylation data processing")
-    logging.info(f"BAM files: {bam}")
-    logging.info(f"Output file: {out_file}")
-    logging.info(f"Regions BED file: {regions_bed}")
-    logging.info(f"Sample name: {sample}")
+    logger.info("Starting methylation data processing")
+    logger.info(f"BAM files: {bam}")
+    logger.info(f"Output file: {out_file}")
+    logger.info(f"Regions BED file: {regions_bed}")
+    logger.info(f"Sample name: {sample}")
 
     regions_df = pd.read_csv(regions_bed, sep="\t", header=None)
 
     # Log the number of regions being processed
-    logging.info(f"Number of regions to process: {len(regions_df)}")
+    logger.info(f"Number of regions to process: {len(regions_df)}")
 
     all_reads_df_list = []
 
@@ -54,10 +53,10 @@ def main(bam: list, haplotypes: list, out_file: str, regions_bed: str, sample: s
 
     all_reads_df = []
     for sample in bams_dict:
-        logging.info(f"Processing sample: {sample}")
+        logger.info(f"Processing sample: {sample}")
         for idx, row in regions_df.iterrows():
             chrom, start, end = row[0], row[1], row[2]
-            # logging.info(f"Processing region: {chrom}:{start}-{end}")
+            # logger.info(f"Processing region: {chrom}:{start}-{end}")
             for haplotype in haplotypes:
                 bam_file = bams_dict[sample][haplotype]
                 bamfile = pysam.AlignmentFile(bam_file, "rb")
@@ -114,7 +113,7 @@ def main(bam: list, haplotypes: list, out_file: str, regions_bed: str, sample: s
                             continue
 
     # Log completion of processing
-    logging.info("Methylation data processing completed")
+    logger.info("Methylation data processing completed")
 
     # create a dataframe
     reads_df = pd.DataFrame(all_reads_df, columns=columns)
