@@ -3,15 +3,15 @@ import pandas as pd
 from pybedtools import BedTool
 import pysam
 import sys
-from methtools.utils.logconfig import setup_logging
+import logging
 
 pysam.set_verbosity(0)
 import warnings
 
 warnings.simplefilter("ignore", UserWarning)
 
-# Initialize logging configuration
-setup_logging()
+# Get a logger specific to this module
+logger = logging.getLogger(__name__)
 
 
 def get_read_strand(read):
@@ -139,7 +139,7 @@ def main(args):
     os.makedirs(results_path, exist_ok=True)
 
     # Prepare SNPs overlapping Regions of Interest
-    logging.info("Preparing SNPs overlapping Regions of Interest")
+    logger.info("Preparing SNPs overlapping Regions of Interest")
     regions_df = pd.read_csv(regions_path, sep="\t", header=None)[[0, 1, 2]]
 
     regions_df_bed = BedTool.from_dataframe(regions_df).sort()
@@ -223,9 +223,9 @@ def main(args):
         "unknown": 0,
     }
 
-    # logging.info(f"Classifying reads at SNPs in {vcf_with_regions.shape[0]} regions blocks")
+    # logger.info(f"Classifying reads at SNPs in {vcf_with_regions.shape[0]} regions blocks")
     # log threshold
-    logging.info(
+    logger.info(
         (
             f"Classifying reads at {vcf_with_regions.shape[0]} Common SNPs overlapping {len(regions_df_merged)} regions blocks\n"
             "Filtering thresholds:\n"
@@ -342,7 +342,7 @@ def main(args):
                         het_counter += 1
             # log progress
             if all_counter % 500 == 0:
-                logging.info(
+                logger.info(
                     f"Processed {all_counter} SNPs, {het_counter} valid heterozygous ones found"
                 )
 
@@ -378,7 +378,7 @@ def main(args):
     }
 
     # open bam file again and write reads to files
-    logging.info("Writing reads to files")
+    logger.info("Writing reads to files")
     bamfile = pysam.AlignmentFile(bam_path, "rb", reference_filename=ref_fasta)
     outbam_ref = pysam.AlignmentFile(
         f"{results_path}/{out_prefix}.ref.bam",
@@ -465,7 +465,7 @@ def main(args):
     outbam_alt.close()
 
     # sort and index bam files using samtools and os.system
-    logging.info("Sorting and indexing BAM files")
+    logger.info("Sorting and indexing BAM files")
     os.system(
         f"samtools sort {results_path}/{out_prefix}.ref.bam > {results_path}/{out_prefix}.ref.sorted.bam"
     )
@@ -498,7 +498,7 @@ def main(args):
     ]
 
     # write to file
-    logging.info("Writing SNPs to file")
+    logger.info("Writing SNPs to file")
     het_snps_df.to_csv(
         f"{results_path}/{out_prefix}.hets.snps.tsv",
         sep="\t",
@@ -507,7 +507,7 @@ def main(args):
     )
 
     # done
-    logging.info("Done")
+    logger.info("Done")
 
 
 if __name__ == "__main__":
