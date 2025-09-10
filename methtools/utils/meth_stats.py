@@ -312,3 +312,117 @@ def assign_corner_color(
 # )
 
 # p.show()
+
+
+def assign_blended_corner_color(
+    x,
+    y,
+    color1="dodgerblue",
+    color2="firebrick",
+    corner_strength=2.0,  # how fast corners dominate near their diagonals
+    overlay_sharpness=2.0,  # how sharply the overlay ramps up toward center
+    clip=True,
+    na_color=None,
+):
+    """
+    Color a [0,1]x[0,1] unit square with two base colors and a center overlay:
+
+      • color1 is maximal at (0,0) and (1,1)  (main diagonal).
+      • color2 is maximal at (0,1) and (1,0)  (anti-diagonal).
+      • At (0.5,0.5) the color is the *maximum overlay* of color1 & color2
+        (distinct third color), not a simple average.
+
+    The overlay contribution increases smoothly toward the center, while the base
+    color is a linear mix between color1/color2 based on proximity to the two
+    diagonal corner pairs.
+
+    Parameters
+    ----------
+    x, y : array-like of floats in [0,1]
+        Coordinates (same shape). If clip=True, values are clipped to [0,1].
+    color1, color2 : str or RGB tuple
+        Base colors for the two diagonals.
+    corner_strength : float >= 1
+        Larger -> corners dominate more steeply near their diagonals.
+    overlay_sharpness : float >= 1
+        Larger -> overlay peaks more sharply near the center.
+    clip : bool
+        If True, clip x,y into [0,1]; else raise if outside range.
+    na_color : str or None
+        Color to assign where x or y is NaN. (None means "leave empty".)
+
+    Returns
+    -------
+    np.ndarray of hex strings, same shape as x/y.
+    """
+
+    # --- input prep ---
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    if x.shape != y.shape:
+        raise ValueError("x and y must have the same shape.")
+    if clip:
+        x = np.clip(x, 0.0, 1.0)
+        y = np.clip(y, 0.0, 1.0)
+    else:
+        if (x.min() < 0) or (x.max() > 1) or (y.min() < 0) or (y.max() > 1):
+            raise ValueError("x and y must lie within [0,1] when clip=False.")
+
+    out = np.full(x.shape, na_color, dtype=object)
+    valid = ~np.isnan(x) & ~np.isnan(y)
+    if not np.any(valid):
+        return out
+
+    xv = x[valid]
+    yv = y[valid]
+
+    # --- colors as RGB in [0,1] ---
+    c1 = np.array(to_rgb(color1), dtype=float)
+    c2 = np.array(to_rgb(color2), dtype=float)
+
+    # --- distances to the TWO corner-pairs (not individual corners) ---
+    # Pair 1: (0,0) and (1,1) -> color1
+    d10 = np.hypot(xv - 0.0, yv - 0.0)
+    d11 = np.hypot(xv - 1.0, yv - 1.0)
+    d1 = np.minimum(d10, d11)  # nearest distance to pair 1; in [0,1] within unit square
+
+    # Pair 2: (0,1) and (1,0) -> color2
+    d20 = np.hypot(xv - 0.0, yv - 1.0)
+    d21 = np.hypot(xv - 1.0, yv - 0.0)
+    d2 = np.minimum(d20, d21)  # nearest distance to pair 2; in [0,1] within unit square
+
+    # Convert distances to *corner* weights (bigger near their diagonals)
+    # Normalize by 1.0: at the opposite pair's corners, min-distance is exactly 1.
+    w1_raw = np.power(1.0 - np.clip(d1, 0.0, 1.0), corner_strength)
+    w2_raw = np.power(1.0 - np.clip(d2, 0.0, 1.0), corner_strength)
+
+    s = w1_raw + w2_raw
+    s = np.where(s == 0, 1.0, s)  # safety
+    w1 = w1_raw / s
+    w2 = w2_raw / s  # ensures w1 + w2 = 1
+
+    # --- overlay amount: 0 at corners, 1 at center, smooth in between ---
+    # Using 4*w1*w2 ∈ [0,1], max=1 when w1=w2=0.5 (center line), ~0 at corners.
+    t = np.power(4.0 * w1 * w2, overlay_sharpness)
+
+    # --- base linear mix (without overlay) ---
+    base = (w1[:, None] * c1) + (w2[:, None] * c2)
+
+    # --- symmetric OVERLAY blend of the two *fixed* colors ---
+    # Standard overlay per channel; we average overlay(c1,c2) and overlay(c2,c1)
+    # to make it commutative.
+    def _overlay(a, b):
+        # a, b are in [0,1]; vectorized over channels
+        return np.where(a < 0.5, 2.0 * a * b, 1.0 - 2.0 * (1.0 - a) * (1.0 - b))
+
+    O1 = _overlay(c1, c2)
+    O2 = _overlay(c2, c1)
+    overlay_color = 0.5 * (O1 + O2)  # shape (3,)
+
+    # --- combine: lerp between base mix and overlay color by t ---
+    rgb = ((1.0 - t)[:, None] * base) + (t[:, None] * overlay_color)
+
+    # to hex
+    colors_hex = np.array([to_hex(c) for c in rgb], dtype=object)
+    out[valid] = colors_hex
+    return out

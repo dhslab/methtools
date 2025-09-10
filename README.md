@@ -85,7 +85,7 @@ methtools readmeth \
 
 ### 3. `call-mhb`
 
-Calls Methylation Haplotype Blocks (MHBs) from BAM files or precomputed methylation call files.
+Calls Methylation Haplotype Blocks (MHBs) from BAM files or precomputed methylation call files. Currently, it supports only Oxford Nanopore Technologies (ONT) data.
 
 **Note:** When running `call_mhb` with BAM files (using the `--bam` option), `samtools` (>=1.9) and `modkit` (>=0.1.10) must be installed and available in your system's PATH. These tools are used for processing BAM files and extracting methylation calls.
 
